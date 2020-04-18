@@ -139,6 +139,12 @@ class ImageHub():
         """
         self.zmq_socket.send(reply_message)
 
+    def clean_up(self):
+        if self.zmq_socket:
+            self.zmq_socket.close()
+        if self.zmq_context:
+            self.zmq_context.term()
+
 
 class SerializingSocket(zmq.Socket):
     """Numpy array serialization methods.

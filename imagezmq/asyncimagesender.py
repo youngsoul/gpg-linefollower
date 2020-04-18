@@ -57,7 +57,7 @@ class AsyncImageSender(object):
     def _send_immediate(self, frame):
         start = time.time()
         frame_count = 0
-
+        hub_reply = b'unknown'
         try:
 
             if self.show_frame_rate > 0:
@@ -80,6 +80,8 @@ class AsyncImageSender(object):
         except TimeoutError:
             getLogger("AsyncImageSender").error("Sending timeout.. reconnect to server")
             self.sender = self._create_sender()
+
+        return hub_reply
 
     def _send_frame_background_function(self):
         self.sender = self._create_sender()
@@ -107,8 +109,7 @@ class AsyncImageSender(object):
         if self.sender is None:
             self.sender = self._create_sender()
 
-        self._send_immediate(frame)
-        return
+        return self._send_immediate(frame)
 
     def queue_size(self):
         return self.frame_queue.qsize()

@@ -1,63 +1,52 @@
-"""test_2_mac_receive_images.py -- receive & display image stream.
-
-A simple test program that uses imagezmq to receive an image stream from
-a Raspberry Pi and display it as a video steam.
-
-1. Run this program in its own terminal window on the mac:
-python test_2_mac_receive_images.py
-
-This "receive and display images" program must be running before starting
-the RPi sending program.
-
-2. Run the image sending program on the RPi:
-python test_2_rpi_send_images.py
-
-A cv2.imshow() window will appear on the Mac showing the tramsmitted images
-as a video stream. You can repeat Step 2 and start the test_2_rpi_send_images.py
-on multiple RPis and each one will cause a new cv2.imshow() window to open.
-
-To end the programs, press Ctrl-C in the terminal window of the RPi  first.
-Then press Ctrl-C in the terminal window of the receiving proram. You may have
-to press Ctrl-C in the display window as well.
 """
-# import imagezmq from parent directory
-
+"""
 import cv2
 from imagezmq.imagezmq import ImageHub
 import socket
+import signal
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 print(f"Computer Name: {hostname}")
 print(f"IP: {IPAddr}")
 
-# stop, forward, backwards, straight, left, right
-car_moving_status = 'stop'
-
-# straight, left, right
-car_turn_status = b'straight'
+# stop, forward, backwards, exit, straight, left, right
+car_command = b'stop'
 
 image_hub = ImageHub()
-while True:  # show streamed images until Ctrl-C
-    rpi_name, image = image_hub.recv_image()
-    cv2.imshow(rpi_name, image)  # 1 window for each RPi
-    key = cv2.waitKey(1)
-    car_turn_status = b'straight'
-    if key == ord('s'):
-        print("save image...")
-    elif key == ord('1'):
-        car_turn_status = b'left'
-    elif key == ord('2'):
-        car_turn_status = b'straight'
-    elif key == ord('3'):
-        car_turn_status = b'right'
-    elif key == ord('0'):
-        car_moving_status = b'stop'
-    elif key == ord('9'):
-        car_moving_status = b'forward'
-    elif key == ord('8'):
-        car_moving_status = b'backward'
 
+def signal_handler(sig, frame):
+    print("You pressed ctrl-c resetting GPG and exiting")
+    image_hub.clean_up()
 
+signal.signal(signal.SIGINT, signal_handler)
 
-    image_hub.send_reply(b'OK,'+car_turn_status+b','+car_moving_status+b','+car_turn_status)
+if __name__ == '__main__':
+
+    while True:  # show streamed images until Ctrl-C
+        rpi_name, image = image_hub.recv_image()
+        cv2.imshow(rpi_name, image)  # 1 window for each RPi
+        key = cv2.waitKey(1)
+        if key == ord('s'):
+            print("save image...")
+        elif key == ord('1'):
+            car_command = b'left'
+        elif key == ord('2'):
+            car_command = b'straight'
+        elif key == ord('3'):
+            car_command = b'right'
+        elif key == ord('0'):
+            car_command = b'stop'
+        elif key == ord('9'):
+            car_command = b'forward'
+        elif key == ord('8'):
+            car_command = b'backward'
+        elif key == ord('x'):
+            car_command = b'exit'
+
+        if car_command is not None:
+            image_hub.send_reply(car_command)
+        else:
+            image_hub.send_reply(b'OK')
+
+        car_command = None
