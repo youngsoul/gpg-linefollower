@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 gpg.turn_degrees(-20, blocking=True)
                 gpg.forward()
             elif response == b'straight':
-                gpg.turn_degrees(0, blocking=True)
+                # gpg.turn_degrees(0, blocking=True)
                 gpg.forward()
             elif response == b'OK':
                 pass

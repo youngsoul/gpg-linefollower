@@ -4,6 +4,12 @@ import cv2
 from imagezmq.imagezmq import ImageHub
 import socket
 import signal
+from pathlib import Path
+import random
+import string
+import argparse
+
+dataset_path = "./training_data"
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
@@ -21,7 +27,20 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+def save_image(image, turn):
+    p = Path(f"{dataset_path}/{turn}")
+    p.mkdir(exist_ok=True, parents=True)
+    filename = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+
+    cv2.imwrite(f"{dataset_path}/{turn}/{filename}_{turn}.jpg", image)
+
 if __name__ == '__main__':
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-s", "--save-images", required=False, type=int, default=0,
+                    help="Save training images: 1-save, 0-do not save")
+
+    args = vars(ap.parse_args())
+    save_images = args['save_images']
 
     while True:  # show streamed images until Ctrl-C
         rpi_name, image = image_hub.recv_image()
@@ -45,6 +64,13 @@ if __name__ == '__main__':
             car_command = b'exit'
 
         if car_command is not None:
+            if car_command == b'right' and save_images == 1:
+                save_image(image, 'right')
+            elif car_command == b'left' and save_images == 1:
+                save_image(image, 'left')
+            elif car_command == b'straight' and save_images == 1:
+                save_image(image, 'straight')
+
             image_hub.send_reply(car_command)
         else:
             image_hub.send_reply(b'OK')
