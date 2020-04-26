@@ -31,8 +31,10 @@ def save_image(image, turn):
     p = Path(f"{dataset_path}/{turn}")
     p.mkdir(exist_ok=True, parents=True)
     filename = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    full_filename = f"{dataset_path}/{turn}/{filename}_{turn}.jpg"
+    cv2.imwrite(full_filename, image)
 
-    cv2.imwrite(f"{dataset_path}/{turn}/{filename}_{turn}.jpg", image)
+    return full_filename
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
@@ -42,8 +44,11 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     save_images = args['save_images']
 
+    image_filename = None
+
     while True:  # show streamed images until Ctrl-C
         rpi_name, image = image_hub.recv_image()
+
         cv2.imshow(rpi_name, image)  # 1 window for each RPi
         key = cv2.waitKey(1)
         if key == ord('s'):
@@ -62,14 +67,17 @@ if __name__ == '__main__':
             car_command = b'backward'
         elif key == ord('x'):
             car_command = b'exit'
+        elif key == ord('d'):
+            if image_filename:
+                Path(image_filename).unlink(missing_ok=True)
 
         if car_command is not None:
             if car_command == b'right' and save_images == 1:
-                save_image(image, 'right')
+                image_filename = save_image(image, 'right')
             elif car_command == b'left' and save_images == 1:
-                save_image(image, 'left')
+                image_filename = save_image(image, 'left')
             elif car_command == b'straight' and save_images == 1:
-                save_image(image, 'straight')
+                image_filename = save_image(image, 'straight')
 
             image_hub.send_reply(car_command)
         else:
