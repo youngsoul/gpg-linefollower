@@ -1,4 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RandomizedSearchCV
 from imutils import paths
@@ -38,6 +40,10 @@ def get_model():
     params = {'n_estimators': 1600, 'min_samples_split': 10, 'min_samples_leaf': 2, 'max_features': 'auto', 'max_depth': None, 'bootstrap': True}
 
     clf = RandomForestClassifier(**params)
+
+    ## LOGISTIC REGRESSION WAS MUCH FASTER
+    ## AND ALMOST AS ACCURATE
+    clf = LogisticRegression()
     return clf
 
 

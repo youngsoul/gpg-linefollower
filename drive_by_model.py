@@ -17,8 +17,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 gpg = easygopigo3.EasyGoPiGo3()
-gpg.set_speed(100)
-sleep_between_image_sends = 0.1
+# gpg.set_speed(100)
+# sleep_between_image_sends = 0.1
+
+WHEEL_SPEED_CONSTANT = 50
+# (left multiplier, right multiplier)
+left_turn = (0.6, 1.4)
+right_turn = (1.4, 0.6)
+
 
 directions = ["left", "straight", "right"]
 
@@ -65,6 +71,8 @@ if __name__ == '__main__':
     model = load_model()
 
     while True:
+
+        s = time.time()
         frame = video_stream.read()
         if frame is not None:
             if rotation != 0:
@@ -74,24 +82,41 @@ if __name__ == '__main__':
             flatten_image = image.flatten()
             # async_image_sender.send_frame_async(image)
 
+            sm = time.time()
             prediction = model.predict([flatten_image])
+            em = time.time()
+            print(f"Predict time: {(em-sm)} seconds")
+
             direction = prediction[0]
             print(f"Predicted direction: {directions[direction]}")
 
             if direction == 0: # left
-                gpg.turn_degrees(-turn_degrees, blocking=blocking)
-                gpg.forward()
-                # time.sleep(0.5)
+                # gpg.turn_degrees(-turn_degrees, blocking=blocking)
+                # gpg.forward()
+                gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT * left_turn[0])
+                gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT * left_turn[1])
             elif direction == 1: #straight
-                gpg.forward()
+                # gpg.forward()
+                gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT)
+                gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT)
             elif direction == 2: # right
-                gpg.turn_degrees(turn_degrees, blocking=blocking)
-                gpg.forward()
-                # time.sleep(0.5)
+                gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT * right_turn[0])
+                gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT * right_turn[1])
+
+                # gpg.turn_degrees(turn_degrees, blocking=blocking)
+                # gpg.forward()
             else:
                 print(f"Unknown direction: {direction}")
 
-        time.sleep(sleep_between_image_sends)
+            # if direction == 0 or direction == 2:
+            #     print("stop motors after turn")
+            #     time.sleep(0.3)
+            #     gpg.set_motor_power(gpg.MOTOR_LEFT, 0)
+            #     gpg.set_motor_power(gpg.MOTOR_RIGHT, 0)
+
+        e = time.time()
+        print(f"Loop Time: {(e-s)} seconds")
+        # time.sleep(sleep_between_image_sends)
 
     gpg.reset_all()
 
