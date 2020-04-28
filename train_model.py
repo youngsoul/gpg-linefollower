@@ -3,6 +3,8 @@ from sklearn.linear_model import LogisticRegression
 
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+
 from imutils import paths
 import cv2
 import numpy as np
@@ -36,6 +38,7 @@ def get_image_data():
 
 
 def get_model():
+    """
     # these were identified by running find_model_params
     params = {'n_estimators': 1600, 'min_samples_split': 10, 'min_samples_leaf': 2, 'max_features': 'auto', 'max_depth': None, 'bootstrap': True}
 
@@ -43,7 +46,12 @@ def get_model():
 
     ## LOGISTIC REGRESSION WAS MUCH FASTER
     ## AND ALMOST AS ACCURATE
-    clf = LogisticRegression()
+    """
+    clf = LogisticRegression(penalty="l2", C=0.0001, solver='saga', multi_class='auto')
+
+    # KNN was determined by TPOT
+    # this turned out to be too slow.  each predict was about 0.2 seconds
+    # clf = KNeighborsClassifier(n_neighbors=93, p=1, weights="uniform")
     return clf
 
 
@@ -91,7 +99,7 @@ def train_model(model, X, y):
 def train_save_model(model, X, y):
     model.fit(X,y)
     dump(model, "rpi_gpg3_line_follower_model.sav")
-
+    print("Model trained and saved.")
 
 if __name__ == '__main__':
 

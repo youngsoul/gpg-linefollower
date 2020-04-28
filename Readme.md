@@ -9,7 +9,7 @@
 
 `python receive_images.py`
 
-`python server_training_data_collector.py`
+`python server_training_data_collector.py --save-images 1`
 
 
 ## RPI

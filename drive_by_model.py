@@ -20,7 +20,7 @@ gpg = easygopigo3.EasyGoPiGo3()
 # gpg.set_speed(100)
 # sleep_between_image_sends = 0.1
 
-WHEEL_SPEED_CONSTANT = 50
+WHEEL_SPEED_CONSTANT = 40
 # (left multiplier, right multiplier)
 left_turn = (0.6, 1.4)
 right_turn = (1.4, 0.6)
