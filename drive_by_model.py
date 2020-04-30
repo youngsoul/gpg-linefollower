@@ -9,6 +9,8 @@ from imutils.video import VideoStream
 import imutils as imutils
 import socket
 from gpg3_image_util import process_image
+from pathlib import Path
+import cv2
 
 import logging
 logger = logging.getLogger("AsyncImageSender")
@@ -22,8 +24,8 @@ gpg = easygopigo3.EasyGoPiGo3()
 
 WHEEL_SPEED_CONSTANT = 40
 # (left multiplier, right multiplier)
-left_turn = (0.6, 1.4)
-right_turn = (1.4, 0.6)
+left_turn = (0.5, 1.5)
+right_turn = (1.5, 0.5)
 
 
 directions = ["left", "straight", "right"]
@@ -32,6 +34,13 @@ def signal_handler(sig, frame):
     print("You pressed ctrl-c resetting GPG and exiting")
     gpg.reset_all()
     sys.exit()
+
+saved_image_index = 0
+def save_image(image_to_save):
+    global saved_image_index
+    print(f"Write File: ./route_images/image_{saved_image_index}.jpg")
+    cv2.imwrite(f"./route_images/image_{saved_image_index}.jpg", image_to_save)
+    saved_image_index += 1
 
 
 def setup_async_image_sender():
@@ -59,17 +68,21 @@ if __name__ == '__main__':
     ap.add_argument("-r", "--rotate", required=False, default=0, help="Rotate the image by the provided degrees")
     ap.add_argument("--turn-degrees", required=False, default=5, type=int, help="Degress to turn")
     ap.add_argument("--blocking", required=False, default=0, type=int, help="1-blocking=True in GPG calls, 0-blocking is false")
+    ap.add_argument("--save-every-n", required=False, default=0, type=int, help="Save every n images while driving route. 0=none saved")
 
     args = vars(ap.parse_args())
     server_ip = args['server_ip']
     rotation = float(args['rotate'])
     turn_degrees = args['turn_degrees']
     blocking = False if args['blocking'] == 0 else True
+    every_n_route_images = args['save_every_n']
+    if every_n_route_images > 0:
+        Path('./route_images').mkdir(parents=True, exist_ok=True)
 
     video_stream, async_image_sender = setup_async_image_sender()
 
     model = load_model()
-
+    loop_count = 0
     while True:
 
         s = time.time()
@@ -79,6 +92,9 @@ if __name__ == '__main__':
                 frame = imutils.rotate(frame, rotation)
 
             image = process_image(frame)
+            if every_n_route_images > 0 and loop_count % every_n_route_images == 0:
+                save_image(image)
+
             flatten_image = image.flatten()
             # async_image_sender.send_frame_async(image)
 
@@ -108,11 +124,6 @@ if __name__ == '__main__':
             else:
                 print(f"Unknown direction: {direction}")
 
-            # if direction == 0 or direction == 2:
-            #     print("stop motors after turn")
-            #     time.sleep(0.3)
-            #     gpg.set_motor_power(gpg.MOTOR_LEFT, 0)
-            #     gpg.set_motor_power(gpg.MOTOR_RIGHT, 0)
 
         e = time.time()
         print(f"Loop Time: {(e-s)} seconds")
