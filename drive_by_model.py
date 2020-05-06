@@ -123,8 +123,10 @@ if __name__ == '__main__':
                     help="ip address of the server to which the client will connect")
     ap.add_argument("-r", "--rotate", required=False, default=0, help="Rotate the image by the provided degrees")
     ap.add_argument("--save-every-n", required=False, default=0, type=int, help="Save every n images while driving route. 0=none saved")
+    ap.add_argument("--send-images", required=False, default=0, type=int, help="1-send image to server, 0[default]-do not send image to server")
 
     args = vars(ap.parse_args())
+    send_images = args['send_images']
     server_ip = args['server_ip']
     rotation = float(args['rotate'])
     every_n_route_images = args['save_every_n']
@@ -165,15 +167,15 @@ if __name__ == '__main__':
             sm = time.time()
             prediction = model.predict([flatten_image])
             em = time.time()
-            print(f"Predict time: {(em-sm)} seconds")
+            # print(f"Predict time: {(em-sm)} seconds")
 
             direction = prediction[0]
-            print(f"Predicted direction: {directions[direction]}")
+            # print(f"Predicted direction: {directions[direction]}")
 
             # the loop is pretty fast so only send one image for every few thousand.
             # I found 4000 to be a good number and the images on the server
             # looked good.
-            if loop_count % 4000 == 0:
+            if send_images == 1 and loop_count % 4000 == 0:
                 async_image_sender.server_name = directions[direction]
                 async_image_sender.send_frame_async(roi)
 
@@ -192,7 +194,7 @@ if __name__ == '__main__':
 
 
         e = time.time()
-        print(f"Loop Time: {(e-s)} seconds")
+        # print(f"Loop Time: {(e-s)} seconds")
 
     gpg.reset_all()
 
