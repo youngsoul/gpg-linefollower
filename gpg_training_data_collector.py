@@ -7,7 +7,6 @@ from imagezmq.asyncimagesender import AsyncImageSender
 from imutils.video import VideoStream
 import imutils as imutils
 import socket
-import cv2
 from gpg3_image_util import process_image
 
 import logging
@@ -81,23 +80,18 @@ if __name__ == '__main__':
                 gpg.stop()
             elif response == b'forward':
                 gpg.drive_inches(1.0, blocking=blocking)
-                # gpg.forward()
             elif response == b'backward':
                 gpg.backward()
             elif response == b'right':
                 gpg.turn_degrees(turn_degrees, blocking=blocking)
                 if forward_after_turn:
                     gpg.drive_inches(1.0, blocking=blocking)
-                    # gpg.forward()
             elif response == b'left':
                 gpg.turn_degrees(-turn_degrees, blocking=blocking)
                 if forward_after_turn:
                     gpg.drive_inches(1.0, blocking=blocking)
-                    # gpg.forward()
             elif response == b'straight':
-                # gpg.turn_degrees(0, blocking=True)
                 gpg.drive_inches(1.0, blocking=blocking)
-                # gpg.forward()
             elif response == b'OK':
                 pass
             else:

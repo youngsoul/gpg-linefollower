@@ -1,39 +1,66 @@
-"""test_2_mac_receive_images.py -- receive & display image stream.
-
-A simple test program that uses imagezmq to receive an image stream from
-a Raspberry Pi and display it as a video steam.
-
-1. Run this program in its own terminal window on the mac:
-python test_2_mac_receive_images.py
-
-This "receive and display images" program must be running before starting
-the RPi sending program.
-
-2. Run the image sending program on the RPi:
-python test_2_rpi_send_images.py
-
-A cv2.imshow() window will appear on the Mac showing the tramsmitted images
-as a video stream. You can repeat Step 2 and start the test_2_rpi_send_images.py
-on multiple RPis and each one will cause a new cv2.imshow() window to open.
-
-To end the programs, press Ctrl-C in the terminal window of the RPi  first.
-Then press Ctrl-C in the terminal window of the receiving proram. You may have
-to press Ctrl-C in the display window as well.
 """
-# import imagezmq from parent directory
+When the car is driving by model, the car can send images to this server for display.
 
+This script will display the image from the and indicate if the prediction was
+-Left
+-Right
+-Straight
+
+We can then see what the car sees, and that the model tells the car to do.
+"""
 import cv2
 from imagezmq.imagezmq import ImageHub
 import socket
+import signal
+import sys
+
+# ImageHub is the class that allows for receiving images from ZMQ
+image_hub = ImageHub()
+
+
+def signal_handler(sig, frame):
+    print("You pressed ctrl-c resetting GPG and exiting")
+    if image_hub:
+        image_hub.clean_up()
+
+    sys.exit()
+
+
+signal.signal(signal.SIGINT, signal_handler)
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 print(f"Computer Name: {hostname}")
 print(f"IP: {IPAddr}")
 
+# draw a circle on the image to indicate the predicted value
+# from the GoPiGo
+left_coordinates = (20, 40)
 
-image_hub = ImageHub()
+straight_coordinates = (96, 40)
+
+right_coordinates = (172, 40)
+
+# Radius of circle
+radius = 20
+
+# Director circle color in BGR
+left_color = (255, 0, 0)
+straight_color = (0, 255, 0)
+right_color = (0, 0, 255)
+
 while True:  # show streamed images until Ctrl-C
     rpi_name, image = image_hub.recv_image()
-    cv2.imshow(rpi_name, image)  # 1 window for each RPi
+    print(rpi_name)
+    if rpi_name == 'left':
+        image = cv2.circle(image, left_coordinates, radius, left_color, thickness=-1)
+    elif rpi_name == 'straight':
+        image = cv2.circle(image, straight_coordinates, radius, straight_color, thickness=-1)
+    elif rpi_name == 'right':
+        image = cv2.circle(image, right_coordinates, radius, right_color, thickness=-1)
+
+    # The protocol is a request/response so we must respond with a message.
+    image_hub.send_reply(b'OK')
+
+    cv2.imshow("GoPiGo", image)
     cv2.waitKey(1)

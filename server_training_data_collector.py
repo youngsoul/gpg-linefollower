@@ -1,4 +1,9 @@
 """
+This script is used to collect training data.
+
+This script will display the image from the car, and allow for keyboard input to determine if the car
+should turn left, right or continue straight.
+
 """
 import cv2
 from imagezmq.imagezmq import ImageHub

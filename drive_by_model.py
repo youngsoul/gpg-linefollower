@@ -12,31 +12,81 @@ from gpg3_image_util import process_image
 from pathlib import Path
 import cv2
 
+
 import logging
 logger = logging.getLogger("AsyncImageSender")
 logger.setLevel(logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG)
 
-
+# Create instance of the GoPiGo class
 gpg = easygopigo3.EasyGoPiGo3()
-# gpg.set_speed(100)
-# sleep_between_image_sends = 0.1
 
+# Initialize the button to start/stop the car
+go_button = gpg.init_button_sensor("AD2")
+RELEASED = 0
+PRESSED = 1
+button_state = RELEASED
+
+# Initialize the state of the car in the stopped state
+CAR_GO = 1
+CAR_STOP = 0
+go_state = CAR_STOP
+
+# Set the speed.  This is a value that can be experimented with.  You have to
+# maintain the right balance between speed, turning rate and inference speed.
 WHEEL_SPEED_CONSTANT = 40
+
 # (left multiplier, right multiplier)
+# turn rate
 left_turn = (0.5, 1.5)
 right_turn = (1.5, 0.5)
 
-
+# Friendly names for the direction predictions
 directions = ["left", "straight", "right"]
 
+def check_car_state():
+    """
+    Check to see if the car should go or stop
+    :return:
+    :rtype:
+    """
+    global button_state, go_state
+    p = go_button.read()
+    if button_state == RELEASED and p == 1:
+        button_state = PRESSED
+        if go_state == CAR_STOP:
+            go_state = CAR_GO
+        else:
+            go_state = CAR_STOP
+
+    if p == 0:
+        button_state = RELEASED
+
+
 def signal_handler(sig, frame):
+    """
+    Exit gracefully
+    :param sig:
+    :type sig:
+    :param frame:
+    :type frame:
+    :return:
+    :rtype:
+    """
     print("You pressed ctrl-c resetting GPG and exiting")
     gpg.reset_all()
     sys.exit()
 
 saved_image_index = 0
 def save_image(image_to_save):
+    """
+    Sometimes it is helpful to save the images the car is seeing while it is driving to help collect
+    training images or to debug the model.
+    :param image_to_save:
+    :type image_to_save:
+    :return:
+    :rtype:
+    """
     global saved_image_index
     print(f"Write File: ./route_images/image_{saved_image_index}.jpg")
     cv2.imwrite(f"./route_images/image_{saved_image_index}.jpg", image_to_save)
@@ -44,6 +94,11 @@ def save_image(image_to_save):
 
 
 def setup_async_image_sender():
+    """
+    Initialize VideoStream and Async Image Sender
+    :return:
+    :rtype:
+    """
     # get the host name, initialize the video stream, and allow the
     # camera sensor to warmup
     rpiName = socket.gethostname()
@@ -53,6 +108,7 @@ def setup_async_image_sender():
     async_image_sender = AsyncImageSender(server_name=rpiName, server_ip=server_ip, port=5555, send_timeout=10,
                                            recv_timeout=10, show_frame_rate=10, backlog=3)
 
+    time.sleep(0.2) # give everthing a chance to settle out
     return video_stream, async_image_sender
 
 def load_model():
@@ -66,24 +122,28 @@ if __name__ == '__main__':
     ap.add_argument("-s", "--server-ip", required=False, default='192.168.1.208',
                     help="ip address of the server to which the client will connect")
     ap.add_argument("-r", "--rotate", required=False, default=0, help="Rotate the image by the provided degrees")
-    ap.add_argument("--turn-degrees", required=False, default=5, type=int, help="Degress to turn")
-    ap.add_argument("--blocking", required=False, default=0, type=int, help="1-blocking=True in GPG calls, 0-blocking is false")
     ap.add_argument("--save-every-n", required=False, default=0, type=int, help="Save every n images while driving route. 0=none saved")
 
     args = vars(ap.parse_args())
     server_ip = args['server_ip']
     rotation = float(args['rotate'])
-    turn_degrees = args['turn_degrees']
-    blocking = False if args['blocking'] == 0 else True
     every_n_route_images = args['save_every_n']
     if every_n_route_images > 0:
         Path('./route_images').mkdir(parents=True, exist_ok=True)
 
     video_stream, async_image_sender = setup_async_image_sender()
 
+    async_image_sender.run_in_background()
+    time.sleep(2)
+
     model = load_model()
     loop_count = 0
     while True:
+        check_car_state()
+        if go_state == CAR_STOP:
+            gpg.stop()
+            time.sleep(0.5)
+            continue
 
         s = time.time()
         frame = video_stream.read()
@@ -91,13 +151,17 @@ if __name__ == '__main__':
             if rotation != 0:
                 frame = imutils.rotate(frame, rotation)
 
-            image = process_image(frame)
+            # get a cropped, black and white image and the rgb roi
+            image, roi = process_image(frame)
+
+            # check to see if we need to save the raw image
             if every_n_route_images > 0 and loop_count % every_n_route_images == 0:
                 save_image(image)
 
+            # flatten the image so we can run it through the ML model
             flatten_image = image.flatten()
-            # async_image_sender.send_frame_async(image)
 
+            # from the flattened image, predict which direction to go
             sm = time.time()
             prediction = model.predict([flatten_image])
             em = time.time()
@@ -106,28 +170,29 @@ if __name__ == '__main__':
             direction = prediction[0]
             print(f"Predicted direction: {directions[direction]}")
 
+            # the loop is pretty fast so only send one image for every few thousand.
+            # I found 4000 to be a good number and the images on the server
+            # looked good.
+            if loop_count % 4000 == 0:
+                async_image_sender.server_name = directions[direction]
+                async_image_sender.send_frame_async(roi)
+
+            # based on the prediction, change the wheel power to make turns
             if direction == 0: # left
-                # gpg.turn_degrees(-turn_degrees, blocking=blocking)
-                # gpg.forward()
                 gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT * left_turn[0])
                 gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT * left_turn[1])
             elif direction == 1: #straight
-                # gpg.forward()
                 gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT)
                 gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT)
             elif direction == 2: # right
                 gpg.set_motor_power(gpg.MOTOR_LEFT, WHEEL_SPEED_CONSTANT * right_turn[0])
                 gpg.set_motor_power(gpg.MOTOR_RIGHT, WHEEL_SPEED_CONSTANT * right_turn[1])
-
-                # gpg.turn_degrees(turn_degrees, blocking=blocking)
-                # gpg.forward()
             else:
                 print(f"Unknown direction: {direction}")
 
 
         e = time.time()
         print(f"Loop Time: {(e-s)} seconds")
-        # time.sleep(sleep_between_image_sends)
 
     gpg.reset_all()
 
