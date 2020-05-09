@@ -38,8 +38,8 @@ WHEEL_SPEED_CONSTANT = 40
 
 # (left multiplier, right multiplier)
 # turn rate
-left_turn = (0.5, 1.5)
-right_turn = (1.5, 0.5)
+left_turn = (0.4, 1.6)
+right_turn = (1.6, 0.4)
 
 # Friendly names for the direction predictions
 directions = ["left", "straight", "right"]

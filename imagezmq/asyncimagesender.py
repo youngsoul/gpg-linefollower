@@ -70,7 +70,7 @@ class AsyncImageSender(object):
 
             try:
                 hub_reply = self.sender.send_image(self.server_name, frame)
-                print(f"Hub Reply: {hub_reply}")
+                # print(f"Hub Reply: {hub_reply}")
             except Exception as exc:
                 hub_reply = b'timeout'
                 getLogger("AsyncImageSender").error("send_image exception")

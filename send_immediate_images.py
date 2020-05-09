@@ -6,6 +6,7 @@ from imutils.video import VideoStream
 import imutils as imutils
 import socket
 import argparse
+from gpg3_image_util import process_image
 
 
 """
@@ -48,8 +49,10 @@ while True:
             frame = imutils.rotate(frame, rotation)
 
         # response = async_image_sender1.send_frame_immediate(frame)
-        response = async_image_sender1.send_frame_async(frame)
-        print(response)
+        image2, roi = process_image(frame)
+
+        response = async_image_sender1.send_frame_async(roi)
+        # print(response)
 
         image_count += 1
 
