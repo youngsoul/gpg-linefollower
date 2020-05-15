@@ -80,6 +80,32 @@ You will want the V2 Camera Module.  The [RaspberryPI](https://www.raspberrypi.o
 
 I used a button to start and stop the GoPiGo car but this is not required.
 
+### Camera Mount
+
+The camera mount is tricky because, as far as I know, there is no commercial camera mount for the GoPiGo3 that attaches to the front of the car at about a 45 degree angle pointing downwards.
+
+I used a camera mount like:
+
+[Amazon Link to Camera Mount](https://www.amazon.com/Makeronics-Acrylic-Holder-Raspberry-Transparent/dp/B07SQL2RNR)
+
+but that tilts the camera up.  The rounded points of the base of mount just fit into a couple of the GoPiGo3 holes.  I then tipped the camera mount forward, put some weather stripping under it, and used a twist tie to fasten it to the GoPiGo3.  I know - its very McGyver.
+
+The angle is about 45 degress from the horizontal.  
+
+Adrian in the RPi4CV Hacker Bundle used some duct tape and cardboard.  
+
+> Left Side
+![Camera Left](./media/camera_mount/camera_left.JPG)
+
+> Right Side
+![Camera Left](./media/camera_mount/camera_right.JPG)
+
+> Top
+![Camera Left](./media/camera_mount/camera_top.JPG)
+
+> Bottom
+![Camera Left](./media/camera_mount/camera_bottom.png)
+
 
 ## Car Setup
 
