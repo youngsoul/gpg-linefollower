@@ -66,12 +66,17 @@ if __name__ == '__main__':
     async_image_sender = setup_async_image_sender()
 
     while True:
+        # read an image(frame) from the video camera
         frame = video_stream.read()
         if frame is not None:
             if rotation != 0:
                 frame = imutils.rotate(frame, rotation)
 
+            # process the image to reduce the size, and convert to black and white
             image = process_image(frame)
+
+            # send image synchronously and wait for reply.  We will use the reply as
+            # the command on what to do nextd
             response = async_image_sender.send_frame_immediate(image)
             print(f"Command: {response}")
             if response == b'exit':

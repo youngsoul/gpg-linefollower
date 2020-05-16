@@ -9,7 +9,7 @@ I thought, could I use what I know about machine learning and a GoPiGo to build 
 
 I realize DexterIndustries has a ['line follower' sensor](https://www.dexterindustries.com/GoPiGo/gopigo-line-follower-getting-started/using-gopigo-line-follower/) but the goal was to use computer vision techniques to acquire and process the raw image data, into a form that a machine learning model can learn from.
 
-While this project is simple in concept, I found it be a very good intermediate level, end-to-end, machine learning project.
+While this project is simple in concept, I found it to be a very good intermediate level, end-to-end, machine learning project.
 
 The article represents my approach to solving that problem. 
 
@@ -135,13 +135,246 @@ This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchas
 In the Hacker bundle, he has a GoPiGo line following example where he uses 'fuzzy logic' to follow the line.
 
 
+## Development Environment
+
+For this project I used [PyCharm Professional](https://www.jetbrains.com/pycharm/).  I wanted to use the remote Python interpreter and remote deployment capabilities.  This allowed me to development on my MacBookPro but use the interpretor on the GoPiGo and when I saved files they were automatically synched to the GoPiGo.  Executing scripts on my MacBookPro actually executed the script on the GoPiGo.
+
+Using PyCharm is NOT a requirement.  As long as the files make it down to the GoPiGo eventually any preferred method will work.
+ 
+
 ## Collecting Training Data
 
-### Image as zeros and ones
+### Preparing Video Images
 
+Before getting into collecting the training images, we first need to apply some computer vision to the images from the camera attached to the front of the car.
+
+The raw image from the front of the car looks like:
+
+![Raw Camera View](./media/image_roi_thresh/raw_full_view.png)
+
+We need to reduce this image to just that portion that is in front of the car.  To do this we create a region of interest (ROI) that represents the bottom 25% of the image and a 60% of the width.  The following code snippet is what creates this smaller image:
+
+```python
+    (H, W, C) = image.shape
+    startY = int(H * 0.75)
+    endY = H
+    startX = int(W * 0.2)
+    endX = int(W * 0.8)
+    roi = image[startY:endY, startX:endX]
+```
+
+This created a ROI of shape, (60, 192, 3).
+
+![Raw ROI](./media/image_roi_thresh/raw_roi.png)
+
+roi will be slice of the original image.  For our machine learning algorithm we would like the image to be a black and white image.  To do that we convert the image to greyscale, and then threshold the image to make the picture black and white
+Use cv2 to convert the color and call threshold.  Notice that I used `THRESH_BINARY_INV` because I wanted a white background with a black line.  I believe this would work with a black background and white line as well.
+```python
+    gray_image = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    (T, thresh) = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+```
+
+![Raw ROI](./media/image_roi_thresh/threshold_roi.png)
+
+Now we have the images from the camera collecting just the front of the GoPiGo, and converted to black and white.
+
+### Collecting Training Images by Driving
+
+To collect training images I setup a training track with different turns and curves.    
+
+Even though I setup 90 degree turns, for this project I decided to not handle 90 degree turns but only those with some curvature to them.
+
+![Training Track](./media/training_track.JPG)
+
+I then created a GoPiGo training script to sending processed images to the training server application.  The training server application would allow me to assign a training label of 'left', 'straight', 'right' to the image and it would save the image to the appropriately named folder.  If I selected the incorrect label, 'd' will delete the last image saved.
+
+#### GoPiGo Training Scripts
+
+The `gpg_training_data_collector.py` script sends processed images to the `server_training_data_collector.py` running on my MacBookPro.
+
+This allows me to view the image and decide if that image should represent 'left', 'straight', 'right'. Once selected, the image is saved on the laptop and a command sent to the GoPiGo to perform the command and move forward a short distance.  This repeated for all of the training lines.
+
+See the folder:  `training_data/left`, `training_data/right`, `training_data/straight` for a collection of the files.
+
+##### Left Training Images
+
+![LeftCollage](./media/turn_collage/left_collage.png)
+
+##### Straight Training Images
+
+![LeftCollage](./media/turn_collage/straight_collage.png)
+
+##### Right Training Images
+
+![LeftCollage](./media/turn_collage/right_collage.png)
+
+In determining what label to apply to each image, it took a combination of looking at the image from the GoPiGo and seeing where the GoPiGo was on the track.  What looked like a turn, actually made more sense to go straight for a little while longer before turning.
+
+I am still not sure all of the images are labeled 'correctly' but the GoPiGo is able to follow the lines.
+
+### ImageZMQ
+
+To send images from the GoPiGo and receive responses from the MacBookPro, I used an open source package called ImageZMQ.  This package was created by Jeff Bass and you can find his Github repo [here](https://github.com/jeffbass/imagezmq).
+
+I am using [my fork](https://github.com/youngsoul/imagezmq) because I added the ability to have send/receive timeouts incase either the client or the server dropped.
+
+The ImageZMQ library uses [Zmq](https://zeromq.org) to send images and has a class to send images called, `ImageSender` and a class to receive messages called, `ImageHub`.  This makes it very easy to send images and the request/response protocol is handled as is the data formatting.
+
+The messaging to collect the images looks as follows:
+
+![TrainingSequence](./media/message_sequence/training_messaging.png) 
+
+### Training Image GoPiGo Client
+See:
+
+> `gpg_training_data_collector.py`
+
+This file contains the client that runs on the GoPiGo.  Essentially this is an infinite loop collecting frames from the video camera, sending the image and getting the response from the server as to what to do next.
+
+### Training Image Server 
+See:
+> `server_training_data_collector.py`
+
+This file contains the server that runs on a laptop.  Essentially this is an infinite loop receiving an image.  I determine what label to associate to the image. Finally the server responds with a command telling the GoPiGo what to do.
+
+In total the following number of images were collected:
+```text
+.
+├── left [403 entries exceeds filelimit, not opening dir]
+├── right [320 entries exceeds filelimit, not opening dir]
+└── straight [422 entries exceeds filelimit, not opening dir]
+
+```
 ## Training a model
 
+Once we have the training images we can then train the model.
+
+There are a couple of things to keep in mind here:
+> I am running code on the GoPiGo for development, but during the model exploration phase I want to run on my MacBookPro.  I created a separate project for training and tuning the model.
+
+> Ultimately, I have to train the final model on the GoPiGo because you cannot create a model in one compute architecture and save to another.  It wont work - I tried
+
+> The model you ultimately select will be calculating inferences on the GoPiGo so it has to be fast
+
+I ultimately decided to create a new Python project that was just for model exploration.
+
+You can find that Github repo [here](TODO)
+
+The file in the above repo to look at is:  `train_eval_logreg.py`.  The other files were used for more exploratory model analysis.  I ultimately settle on LogisticRegression because it was very fast to execute in the RaspberryPI.  RandomForest and Knn, with the best parameters ran too slow to allow for the model to predict the turns.
+
+I will summarize the details here.
+
+The function:
+```python
+def find_best_logreg_model_params(X, y):
+    """
+    {'solver': 'saga', 'penalty': 'l2', 'C': 0.0001}
+    :param X: ndarray of shape ( 60*192 ) = 11520
+    :type X: ndarray
+    :param y:
+    :type y:
+    :return:
+    :rtype:
+    """
+    model = LogisticRegression()
+    random_grid = {
+        'solver': ['lbfgs', 'newton-cg', 'sag', 'saga'],
+        'penalty': ["l2"],
+        'C': [1e-4, 1e-3, 1e-2, 1e-1],
+        'class_weight': [None, 'balanced']
+    }
+    rf_random = RandomizedSearchCV(estimator=model,
+                                   param_distributions=random_grid,
+                                   n_iter=75, cv=3,
+                                   verbose=2,
+                                   random_state=42,
+                                   n_jobs=-1)
+    rf_random.fit(X, y)
+    print(rf_random.best_params_)
+
+```
+is used to tune the Hyperparameters of a LogisticRegression model.  This function assumes the images have been read in and are flatten into an array of share (11520,).
+
+After this completes it produces the following:
+```text
+clf = LogisticRegression(penalty="l2", C=0.0001, solver='saga', multi_class='auto')
+
+Cross Value took: 88.6061041355133 seconds
+[0.96943231 0.9650655  0.9650655  0.97816594 0.96069869]
+0.9676855895196507
+```
+
+Based on the training data, it found hyperparameters that resulted in an accuracy of about 96.7%.
+
+The confusion matrix for the training data is shown below:
+```text
+actual vs predicted:
+
+          left  straight  right
+left       395         8      0
+straight    11       403      8
+right        0         9    311
+```
+
+When I was tuning and evaluating the model, while I definitely was trying to maximize the diagonal values, I wanted to minimize the left,right and right,left prediction mismatches.
+
+Having [left, right]==0 and [right,left]==0 was exactly my goal.  I could live with an incorrect 'straight' prediction on the premise it was likely I would correct on the next image, but it was very difficult to recover from incorrectly turning right, when I needed to turn left.
+
 ## Deploying a model to the RaspberryPI
+
+Once I knew the LogisticParameters to use, I still had to train the model on the RaspberryPI on the GoPiGo.  Fortuntely training a LogisticRegression model is not too bad on the GoPiGo.
+
+This does imply that I transferred the training_data set to the RaspberryPI and to train the model I used the script called:  `train_model.py` in this repo.
+
+Remove comments, etc the training script is as below:
+```python
+from sklearn.linear_model import LogisticRegression
+from imutils import paths
+import cv2
+from joblib import dump
+
+# 0, 1, 2
+directions = ["left", "straight", "right"]
+
+image_path_root = "/home/pi/dev/training_data"
+
+def get_image_data():
+    imagePaths = list(paths.list_images(image_path_root))
+    direction_vector = []
+    images_vector = []
+    for imagePath in imagePaths:
+        image = cv2.imread(imagePath)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        flatten_image = image.flatten()
+        direction = directions.index(imagePath.split("/")[-2])
+        images_vector.append(flatten_image)
+        direction_vector.append(direction)
+
+    return images_vector, direction_vector
+
+
+def get_model():
+    clf = LogisticRegression(penalty="l2", C=0.0001, solver='saga', multi_class='auto')
+    return clf
+
+def train_save_model(model, X, y):
+    model.fit(X, y)
+    dump(model, "rpi_gpg3_line_follower_model.sav")
+
+if __name__ == '__main__':
+    model = get_model()
+    X, y = get_image_data()
+    train_save_model(model, X, y)
+```
+
+You get the model with parameters based on the previous model exploration, load the image data and train the model.  When the model is complete, save the model locally to the RaspberryPI.
+
+At this point you are ready to create a script to use the model, with new images from the video feed to predict the direction to go.
+
+## Drive By Model
+
+TODO
 
 ### Adding the button
 

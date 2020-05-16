@@ -45,9 +45,12 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-s", "--save-images", required=False, type=int, default=0,
                     help="Save training images: 1-save, 0-do not save")
+    ap.add_argument("--dataset-path", required=False, default="./training_data",
+                    help="Root path to store the training images.")
 
     args = vars(ap.parse_args())
     save_images = args['save_images']
+    dataset_path = args['dataset_path']
 
     image_filename = None
 

@@ -45,9 +45,6 @@ def get_model():
     """
     clf = LogisticRegression(penalty="l2", C=0.0001, solver='saga', multi_class='auto')
 
-    # KNN was determined by TPOT
-    # this turned out to be too slow.  each predict was about 0.2 seconds
-    # clf = KNeighborsClassifier(n_neighbors=93, p=1, weights="uniform")
     return clf
 
 
