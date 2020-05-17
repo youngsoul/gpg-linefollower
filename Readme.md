@@ -38,7 +38,7 @@ This is not a hard hitting oeuvre on the latest advances in computer vision and 
 To send images from the GoPiGo/RaspberryPI and a laptop I used a package written by Jeff Bass called, ImageZMQ.
 You can find out more about ImageZMQ on his Github repo [here](https://github.com/jeffbass/imagezmq).
 
-I am using my fork of his repo with a couple of mods so if you build this project, be sure to get my fork.
+I am using my fork of his repo with a couple of mods so if you build this project, be sure to get [my fork](https://github.com/youngsoul/imagezmq).
 
 ### PyImageSearch
 
@@ -46,15 +46,17 @@ Adrian Rosebrock runs [PyImageSearch.com](www.pyimagesearch.com).  IMHO, the bes
 
 I have a number of his books, and they are all excellent.
 
-For this project, I was using this series of books, `Raspberry PI for Computer Vision`.  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
+For this project, I was using this series of books, [Raspberry PI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
 
-In the Hacker Bundle, Adrian also tackles the Line Follower project but take a more Computer Vision approach, which I decied to take a Machine Learning approach.
+In the Hacker Bundle, Adrian also thttps://www.pyimagesearch.com/raspberry-pi-for-computer-vision/forkackles the Line Follower project but takes a more Computer Vision approach, which I decied to take a Machine Learning approach.
 
 You find out more about his books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
 
 ## Overview
 
-This project uses a GoPiGo3 Robot Car from DexterIndustries with a RaspberryPI3 - not even the latest RaspberryPI4 - with an additional Raspberry PI camera, and a GrovePI button.
+The goal of this project was to 'teach' a GoPiGo Robot car how to follow a line.  There are a number of ways to do this.  This project focused on using Machine Learning and Computer Vision to solve this problem.
+
+This project uses a [GoPiGo3 Robot Car from DexterIndustries](https://www.dexterindustries.com/gopigo3/) with a RaspberryPI3 - not even the latest RaspberryPI4 - with an additional Raspberry PI camera, and a GrovePI button.
 
 The goal was to create a training track with different kinds of turns and line curvatures to collect training images that represent:
 
@@ -349,7 +351,7 @@ right        0         9    311
 
 When I was tuning and evaluating the model, while I definitely was trying to maximize the diagonal values, I wanted to minimize the left,right and right,left prediction mismatches.
 
-Having [left, right]==0 and [right,left]==0 was exactly my goal.  I could live with an incorrect 'straight' prediction on the premise it was likely I would correct on the next image, but it was very difficult to recover from incorrectly turning right, when I needed to turn left.
+Having [left, right]==0 and [right,left]==0 was exactly my goal.  I could live with an incorrect 'straight' prediction on the premise it would correct on the next image, but it was very difficult to recover from incorrectly turning right, when I needed to turn left.
 
 ## Deploying a model to the RaspberryPI
 
