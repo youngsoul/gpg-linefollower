@@ -258,7 +258,7 @@ There are a couple of things to keep in mind here:
 
 I ultimately decided to create a new Python project that was just for model exploration.
 
-You can find that Github repo [here](TODO)
+You can find that Github repo [here](https://github.com/youngsoul/gpg-linefollow-model.git)
 
 The file in the above repo to look at is:  `train_eval_logreg.py`.  The other files were used for more exploratory model analysis.  I ultimately settle on LogisticRegression because it was very fast to execute in the RaspberryPI.  RandomForest and Knn, with the best parameters ran too slow to allow for the model to predict the turns.
 
