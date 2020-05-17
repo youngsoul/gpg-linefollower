@@ -7,6 +7,12 @@ The Camera View while driving with the dots showing the predictions.
 
 ![CamView](./media/driving_roi.gif)
 ----
+I have a [YouTube Video](https://youtu.be/ZOMmYHWG4CU) showing some of the training run on the training course.
+
+I have a a Testing [YouTube Video](https://www.youtube.com/watch?v=GgmnzQduv5E) of the final testing on a new track layout.
+
+---
+
 
 I have given presentations on machine learning, where one of the interactive examples that I use is to train a simulated car driving on a simulated road.  
 
