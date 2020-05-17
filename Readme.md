@@ -30,7 +30,7 @@ Who is the audience for this article?
 
 My target audience for this article are educators that are looking for a fun way to introduce the concepts of computer vision and machine learning to students and those people that like to work with a RaspberryPI from a hobbyist perspective.
 
-This is not a hard hitting oeuvre on the latest advances in computer vision and machine learning.  But if you are looking for a fun and accessible application of the technology then I think you will enjoy this article.
+This is not a hard hitting body of work on the latest advances in computer vision and machine learning.  But if you are looking for a fun and accessible application of the technology then I think you will enjoy this article.
 
 ## References
 
@@ -48,7 +48,7 @@ I have a number of his [books](https://www.pyimagesearch.com/books-and-courses/)
 
 For this project, I was using this series of books, [Raspberry PI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
 
-In the Hacker Bundle, Adrian also tackles the Line Follower project but takes a more Computer Vision approach, which I decied to take a Machine Learning approach.
+In the Hacker Bundle, Adrian also tackles the Line Follower project but takes a more Computer Vision approach, which I decided to take a Machine Learning approach.
 
 You find out more about the RPi4CV series of books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
 
