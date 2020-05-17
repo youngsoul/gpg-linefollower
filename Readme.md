@@ -44,13 +44,13 @@ I am using my fork of his repo with a couple of mods so if you build this projec
 
 Adrian Rosebrock runs [PyImageSearch.com](www.pyimagesearch.com).  IMHO, the best resource for Computer Vision and how to apply Deep Learning to Computer Vision.
 
-I have a number of his books, and they are all excellent.
+I have a number of his [books](https://www.pyimagesearch.com/books-and-courses/), and they are all excellent.
 
 For this project, I was using this series of books, [Raspberry PI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
 
-In the Hacker Bundle, Adrian also thttps://www.pyimagesearch.com/raspberry-pi-for-computer-vision/forkackles the Line Follower project but takes a more Computer Vision approach, which I decied to take a Machine Learning approach.
+In the Hacker Bundle, Adrian also tackles the Line Follower project but takes a more Computer Vision approach, which I decied to take a Machine Learning approach.
 
-You find out more about his books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
+You find out more about the RPi4CV series of books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
 
 ## Overview
 
