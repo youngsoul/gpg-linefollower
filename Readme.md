@@ -163,7 +163,7 @@ I created a [Medium](https://medium.com/@patrick_ryan/building-opencv-4-10-on-ra
 
 [RaspberryPI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/)
 
-This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchase Adrian provides a Raspian Image with the libraries already setup and installed.  This is by far the easiest way to get started, and you get an amazing set of books on how to use the Rasbperry PI for computer vision.
+This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchase Adrian provides a Raspbian Image with the libraries already setup and installed.  This is by far the easiest way to get started, and you get an amazing set of books on how to use the Rasbperry PI for computer vision.
 
 This is the approach I took.
 
