@@ -21,6 +21,26 @@ My target audience for this article are educators that are looking for a fun way
 
 This is not a hard hitting oeuvre on the latest advances in computer vision and machine learning.  But if you are looking for a fun and accessible application of the technology then I think you will enjoy this article.
 
+## References
+
+### ImageZMQ
+To send images from the GoPiGo/RaspberryPI and a laptop I used a package written by Jeff Bass called, ImageZMQ.
+You can find out more about ImageZMQ on his Github repo [here](https://github.com/jeffbass/imagezmq).
+
+I am using my fork of his repo with a couple of mods so if you build this project, be sure to get my fork.
+
+### PyImageSearch
+
+Adrian Rosebrock runs [PyImageSearch.com](www.pyimagesearch.com).  IMHO, the best resource for Computer Vision and how to apply Deep Learning to Computer Vision.
+
+I have a number of his books, and they are all excellent.
+
+For this project, I was using this series of books, `Raspberry PI for Computer Vision`.  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
+
+In the Hacker Bundle, Adrian also tackles the Line Follower project but take a more Computer Vision approach, which I decied to take a Machine Learning approach.
+
+You find out more about his books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
+
 ## Overview
 
 This project uses a GoPiGo3 Robot Car from DexterIndustries with a RaspberryPI3 - not even the latest RaspberryPI4 - with an additional Raspberry PI camera, and a GrovePI button.
@@ -432,13 +452,6 @@ TODO
 
 ### Review your training data
 
-## References
-
-### ImageZMQ
-
-### PyImageSearch
-
-### Dexter Industries
 
 
 ## ZMQ
