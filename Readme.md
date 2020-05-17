@@ -1,7 +1,7 @@
 
 # Using Computer Vision and Machine Learning on a Raspberry PI based GoPiGo car to follow a line.
 
-[//]: ![GPG](./media/cover_photo.JPG)
+![GPG](./media/cover_photo.JPG)
 
 I have given presentations on machine learning, where one of the interactive examples that I use is to train a simulated car driving on a simulated road.  
 
@@ -372,7 +372,47 @@ You get the model with parameters based on the previous model exploration, load 
 
 At this point you are ready to create a script to use the model, with new images from the video feed to predict the direction to go.
 
+### Training YouTube Video
+
+I have a [YouTube Video](https://youtu.be/ZOMmYHWG4CU) showing some of the training run on the training course.
+
 ## Drive By Model
+
+The script that executes to use the ML model and follow the line is, `drive_by_model.py`.
+
+At present, the script assume you are remotely logged into the RaspberryPI on the GoPiGo to start the script. 
+
+The script looks for a button press to start/stop following the line.  
+
+Essentially the script performs the following:
+```text
+FOREVER:
+    read a frame from the video camera
+
+    process the image to resize and threshold
+
+    flatten image
+
+    predict left, straight, right from image
+    
+    send image to server
+
+    adjust motor speeds 
+
+```
+
+I tried a few different models but LogisticRegression was the only one that I tried that was able to make a prediction fast enough.  The prediction time was around 2 ms.
+
+### Turning Rate and Speed
+
+Two parameters that will impact performance are the speed of the vehicle and the turning rate.
+
+The faster the GoPiGo is set to the more aggresive you will have to make the turns, meaning how you shift the power between the two wheels.
+
+
+### Testing YouTube Video
+
+[YouTube Video](https://www.youtube.com/watch?v=GgmnzQduv5E) of the final testing on a new track layout.
 
 TODO
 
