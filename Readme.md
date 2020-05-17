@@ -200,7 +200,7 @@ This created a ROI of shape, (60, 192, 3).
 
 ![Raw ROI](./media/image_roi_thresh/raw_roi.png)
 
-roi will be slice of the original image.  For our machine learning algorithm we would like the image to be a black and white image.  To do that we convert the image to greyscale, and then threshold the image to make the picture black and white
+The ROI will be a slice of the original image.  For our machine learning algorithm we would like the image to be a black and white image.  To do that we convert the image to greyscale, and then threshold the image to make the picture black and white
 Use cv2 to convert the color and call threshold.  Notice that I used `THRESH_BINARY_INV` because I wanted a white background with a black line.  I believe this would work with a black background and white line as well.
 ```python
     gray_image = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
