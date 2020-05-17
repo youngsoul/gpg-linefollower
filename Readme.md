@@ -3,6 +3,11 @@
 
 ![GPG](./media/cover_photo.JPG)
 
+The Camera View while driving with the dots showing the predictions.
+
+![CamView](./media/driving_roi.gif)
+----
+
 I have given presentations on machine learning, where one of the interactive examples that I use is to train a simulated car driving on a simulated road.  
 
 I thought, could I use what I know about machine learning and a GoPiGo to build an actual device that followed a line.
@@ -157,7 +162,7 @@ This is the approach I took.
 
 ## Development Environment
 
-For this project I used [PyCharm Professional](https://www.jetbrains.com/pycharm/).  I wanted to use the remote Python interpreter and remote deployment capabilities.  This allowed me to development on my MacBookPro but use the interpretor on the GoPiGo and when I saved files they were automatically synched to the GoPiGo.  Executing scripts on my MacBookPro actually executed the script on the GoPiGo.
+For this project I used [PyCharm Professional](https://www.jetbrains.com/pycharm/).  I wanted to use the remote Python interpreter and remote deployment capabilities.  This allowed me to development on my MacBookPro but use the interpreter on the GoPiGo and when I saved files they were automatically synched to the GoPiGo.  Executing scripts on my MacBookPro actually executed the script on the GoPiGo.
 
 Using PyCharm is NOT a requirement.  As long as the files make it down to the GoPiGo eventually any preferred method will work.
  
@@ -436,8 +441,6 @@ The faster the GoPiGo is set to the more aggresive you will have to make the tur
 
 TODO
 
-### Adding the button
-
 ### Starting the program at startup
 
 ## Testing the Line Follower
@@ -445,13 +448,6 @@ TODO
 ## Things I learned
 
 ### Start/Stop turning versus continuous turning
-
-### Train model on the Raspberry PI
-
-### Speed of car and turning speed
-
-### Review your training data
-
 
 
 ## ZMQ
