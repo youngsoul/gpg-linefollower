@@ -11,9 +11,9 @@ import socket
 from gpg3_image_util import process_image
 from pathlib import Path
 import cv2
-
-
 import logging
+
+
 logger = logging.getLogger("AsyncImageSender")
 logger.setLevel(logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG)
@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 gpg = easygopigo3.EasyGoPiGo3()
 
 # Initialize the button to start/stop the car
+# This is using 'Analog/Digital2' on the GoPiGo board.
 go_button = gpg.init_button_sensor("AD2")
 RELEASED = 0
 PRESSED = 1
@@ -36,8 +37,12 @@ go_state = CAR_STOP
 # maintain the right balance between speed, turning rate and inference speed.
 WHEEL_SPEED_CONSTANT = 40
 
+# turn rate.  These values determine how aggresive the turn will be.
+# it does this by changing the power to the wheels
+# left_turn = (leftwheelspeedfactor, rightwheelspeedfactor)
+# for a left turn we reduce the speed of the left wheel and increase the speed of the right wheel.  This will
+# cause the car to turn or rotate to the left.  These are values that have to be experimented with.
 # (left multiplier, right multiplier)
-# turn rate
 left_turn = (0.4, 1.6)
 right_turn = (1.6, 0.4)
 

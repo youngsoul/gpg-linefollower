@@ -165,7 +165,18 @@ I created a [Medium](https://medium.com/@patrick_ryan/building-opencv-4-10-on-ra
 
 This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchase Adrian provides a Raspbian Image with the libraries already setup and installed.  This is by far the easiest way to get started, and you get an amazing set of books on how to use the Rasbperry PI for computer vision.
 
-This is the approach I took.
+This is the approach I took.  If you use this approach then the pre-configured Python environment you should use is:
+
+> `/home/pi/.virtualenvs/gopigo3`
+
+to activate
+
+> `source /home/pi/.virtualenvs/gopigo3/bin/activate`
+
+If you also use this path you will need to install PyZMQ into the gopigo3 python virtual environment
+##### ZMQ
+
+`pip install pyzmq`
 
 
 ## Development Environment
@@ -257,14 +268,20 @@ The messaging to collect the images looks as follows:
 
 ![TrainingSequence](./media/message_sequence/training_messaging.png) 
 
-### Training Image GoPiGo Client
+### Collecting Training Images 
+
+This section discusses the scripts used to collect the training image samples.  One script runs on the GoPiGo and will send on image to the server and wait for instructions on how to proceed.  The server, MacBookPro, has a script that will receive the image and accepts keyboard input to determine if the image represents a left, straight, right image.  The image will then be saved on the MacBookPro in a training folder with the appropriate folder name, and the server will return to the GoPiGo the instructions on how to proceed.
+
+This step is a little time consuming because you have to traverse the training tracks collecting frames and labeling them. However, this is a real world example of how you have to collect the training data to be used in the modeling process.
+
+#### GoPiGo Script
 See:
 
 > `gpg_training_data_collector.py`
 
 This file contains the client that runs on the GoPiGo.  Essentially this is an infinite loop collecting frames from the video camera, sending the image and getting the response from the server as to what to do next.
 
-### Training Image Server 
+####  Server or MacBookPro 
 See:
 > `server_training_data_collector.py`
 
@@ -278,6 +295,9 @@ In total the following number of images were collected:
 └── straight [422 entries exceeds filelimit, not opening dir]
 
 ```
+
+Once the images are collected, you should expect to go through them and in retrospect you still agree with the labeling.  In many cases I re-labeled a left or right, for straight because it could go either way.
+
 ## Training a model
 
 Once we have the training images we can then train the model.
@@ -355,7 +375,7 @@ Having [left, right]==0 and [right,left]==0 was exactly my goal.  I could live w
 
 ## Deploying a model to the RaspberryPI
 
-Once I knew the LogisticParameters to use, I still had to train the model on the RaspberryPI on the GoPiGo.  Fortuntely training a LogisticRegression model is not too bad on the GoPiGo.
+Once I knew the LogisticRegresion Parameters to use, I still had to train the model on the RaspberryPI on the GoPiGo.  Fortuntely training a LogisticRegression model is not too bad on the GoPiGo.
 
 This does imply that I transferred the training_data set to the RaspberryPI and to train the model I used the script called:  `train_model.py` in this repo.
 
@@ -409,7 +429,25 @@ At this point you are ready to create a script to use the model, with new images
 
 I have a [YouTube Video](https://youtu.be/ZOMmYHWG4CU) showing some of the training run on the training course.
 
-## Drive By Model
+## Ready for Test Drive
+
+At this point you are ready to take the GoPiGo on a Machine Learning/Computer Vision test drive.
+
+### New Test Track
+
+The first thing I did was to create a new fully connected test track.
+
+![TestTrack](./media/test_track.JPG)
+
+I left some of the original at the top, and completely re-designed the remainder to include (4) 'sharp' turns and a number of gradual turns of different radius.
+
+### GoPiGo Driving Script.
+
+> `drive_by_model.py`
+
+There are two parameters that you need to be aware of:
+>  `server-ip <192.168.x.x>` if you want to send images to a computer to view the images.  This should be the IP address of a computer on the same network.
+>  `send-images [0|1]` a flag to determine if the images should be sent.  Instead of using the sever-ip existence, the initial thought was that I might want to maintain a connect to the server by dynamically change whether images are sent to the server.
 
 The script that executes to use the ML model and follow the line is, `drive_by_model.py`.
 
@@ -428,13 +466,20 @@ FOREVER:
 
     predict left, straight, right from image
     
-    send image to server
+    send image to server asynchronously, return is ignored
 
-    adjust motor speeds 
+    adjust motor speeds to perform the maneuver
 
 ```
 
 I tried a few different models but LogisticRegression was the only one that I tried that was able to make a prediction fast enough.  The prediction time was around 2 ms.
+
+### MacBookPro Server
+
+> `drive_by_model_image_server.py`
+
+This is optional, but if you use it, then you will be able to see the images the GoPiGo is 'seeing' and the prediction it made.
+
 
 ### Turning Rate and Speed
 
@@ -442,51 +487,69 @@ Two parameters that will impact performance are the speed of the vehicle and the
 
 The faster the GoPiGo is set to the more aggresive you will have to make the turns, meaning how you shift the power between the two wheels.
 
-
 ### Testing YouTube Video
 
 [YouTube Video](https://www.youtube.com/watch?v=GgmnzQduv5E) of the final testing on a new track layout.
 
-TODO
+## Starting the program on reboot
 
-### Starting the program at startup
+> `on_reboot.sh`
 
-## Testing the Line Follower
+To start the drive_by_model when the GoPiGo reboots, we create a script that will be run by cron on reboot.
+
+```text
+#!/bin/bash
+source "/home/pi/.virtualenvs/gopigo3/bin/activate"
+cd /home/pi/dev/linefollower
+python drive_by_model.py --server-ip 192.168.1.208 --send-images 1
+```
+
+To add this to cron, use the following steps:
+```text
+sudo crontab -e
+
+at the end of the file
+
+@reboot /home/pi/dev/linefollower/on_reboot.sh
+```
+
+*Make sure you add execute permissions to the on_reboot.sh script on the rasbperry pi*
+
+```text
+chmod +x /home/pi/dev/linefollower/on_reboot.sh
+```
 
 ## Things I learned
 
+### Training/Testing the line follower
+
+When training the line follower, it was best to be standing over the GoPiGo to get a sense for when it was time to turn and when it was ok to go straight.  It is not always clear if you just look at the image from the GoPiGo what you should do so evaluating while looking at the car helped.
+
+Also go through the images to double check the labels are correct.  I modified the labeled list often while reviewing the images.
+
 ### Start/Stop turning versus continuous turning
 
+At first I stopped the car, made the turn, then continued.  This worked fine, but gave the car a very jagged feel to it.  Adjusting the power to the wheels was the best experience but requires testing to know how aggressive to turn.
 
-## ZMQ
-
-`pip install pyzmq`
-
-## Run Image Server
+### Run Image Server
+To run the image sever you will need a Python environment on your MacBookPro that have the necessary libraries such as  OpenCV, ZMQ, ImageZMQ, etc.
 
 `source ~/.virtualenvs/py36cv4_venv/bin/activate`
 
-`python receive_images.py`
+`python drive_by_model_image_server.py`
 
-`python server_training_data_collector.py --save-images 1`
+There is also a script called, `run_dashboard.sh`
+### Test Sending Images
 
+> `send_immedage_images.py --server-ip 192.168.1.208` on the GoPiGo
+> `show_images_from_gopigo.py` on MacBook
 
-## RPI
+## Ending Thoughts
 
-`source ~/.virtualenvs/gopigo3/bin/activate`
+This was a fun project using the GoPiGo, some Computer Vision and some Machine Learning to teach the GoPiGo how to follow a line.
 
-`python ./send_immediate_images.py --server-ip 192.168.1.208`
+I think this is a very approachable project for high school students as well as college level students.
 
-* You have to train the model on the RPI because you cannot train and save the model on one architecture and load it from another cpu architecture.
+Again, much of this is inspired by what I learned on [PyImageSearch](www.pyimagesearch.com) and his [RaspberryPi For Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/) series fo books.
 
-* You have to transfer the training images to rpi
-
-* train model and save model
-
-## Train Model
-
-Training the model is handled by a different project
-
-/Users/patrickryan/Development/python/mygithub/gpg3-linefollow-model
-
-This will save a model file that can be loaded
+ 
