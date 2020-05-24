@@ -30,7 +30,7 @@ Who is the audience for this article?
 
 My target audience for this article are educators that are looking for a fun way to introduce the concepts of computer vision and machine learning to students and those people that like to work with a RaspberryPI from a hobbyist perspective.
 
-This is not a hard hitting oeuvre on the latest advances in computer vision and machine learning.  But if you are looking for a fun and accessible application of the technology then I think you will enjoy this article.
+This is not a hard hitting body of work on the latest advances in computer vision and machine learning.  But if you are looking for a fun and accessible application of the technology then I think you will enjoy this article.
 
 ## References
 
@@ -48,7 +48,7 @@ I have a number of his [books](https://www.pyimagesearch.com/books-and-courses/)
 
 For this project, I was using this series of books, [Raspberry PI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).  There are 3 books in the series.  If you want to know more about how to apply computer vision to the Rasbperry PI there is no better resource.
 
-In the Hacker Bundle, Adrian also tackles the Line Follower project but takes a more Computer Vision approach, which I decied to take a Machine Learning approach.
+In the Hacker Bundle, Adrian also tackles the Line Follower project but takes a more Computer Vision approach, which I decided to take a Machine Learning approach.
 
 You find out more about the RPi4CV series of books [here](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/).
 
@@ -163,7 +163,7 @@ I created a [Medium](https://medium.com/@patrick_ryan/building-opencv-4-10-on-ra
 
 [RaspberryPI for Computer Vision](https://www.pyimagesearch.com/raspberry-pi-for-computer-vision/)
 
-This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchase Adrian provides a Raspian Image with the libraries already setup and installed.  This is by far the easiest way to get started, and you get an amazing set of books on how to use the Rasbperry PI for computer vision.
+This is a 3 book set, and you can buy 1,2 or all 3 books.  With any book purchase Adrian provides a Raspbian Image with the libraries already setup and installed.  This is by far the easiest way to get started, and you get an amazing set of books on how to use the Rasbperry PI for computer vision.
 
 This is the approach I took.
 
@@ -200,7 +200,7 @@ This created a ROI of shape, (60, 192, 3).
 
 ![Raw ROI](./media/image_roi_thresh/raw_roi.png)
 
-roi will be slice of the original image.  For our machine learning algorithm we would like the image to be a black and white image.  To do that we convert the image to greyscale, and then threshold the image to make the picture black and white
+The ROI will be a slice of the original image.  For our machine learning algorithm we would like the image to be a black and white image.  To do that we convert the image to greyscale, and then threshold the image to make the picture black and white
 Use cv2 to convert the color and call threshold.  Notice that I used `THRESH_BINARY_INV` because I wanted a white background with a black line.  I believe this would work with a black background and white line as well.
 ```python
     gray_image = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
