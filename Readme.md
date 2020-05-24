@@ -3,7 +3,7 @@
 
 ![GPG](./media/cover_photo.JPG)
 
-The Camera View while driving with the dots showing the predictions.
+The Camera View while driving with the dots showing the predictions.  The blue dot on the left indicates that the model predicted the car should turn left, the center green dot indicates that the model predicted the car should go straight and the red dot on the right indicates that the model predicted the car should turn right.
 
 ![CamView](./media/driving_roi.gif)
 ----
@@ -95,7 +95,7 @@ To provide insight into what the GoPiGo was seeing, and the decisions it was mak
 
 ### Floor Mat
 
-I used 9, 1/2 inch black form floor tiles that you can find inexpensively at [Walmart](https://www.walmart.com/ip/Everyday-Essentials-1-2-Thick-Flooring-Puzzle-Exercise-Mat-with-High-Quality-EVA-Foam-Interlocking-Tiles-6-Piece-24-Sq-Ft-Multiple-Colors/336366651?selected=true)
+I used 9, 1/2 inch black foam floor tiles that you can find inexpensively at [Walmart](https://www.walmart.com/ip/Everyday-Essentials-1-2-Thick-Flooring-Puzzle-Exercise-Mat-with-High-Quality-EVA-Foam-Interlocking-Tiles-6-Piece-24-Sq-Ft-Multiple-Colors/336366651?selected=true)
 
 You want to use black, because the contrast between the floor and the line will be very important.
 
