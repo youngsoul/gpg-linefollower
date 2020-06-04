@@ -35,7 +35,7 @@ go_state = CAR_STOP
 
 # Set the speed.  This is a value that can be experimented with.  You have to
 # maintain the right balance between speed, turning rate and inference speed.
-WHEEL_SPEED_CONSTANT = 40
+WHEEL_SPEED_CONSTANT = 60
 
 # turn rate.  These values determine how aggresive the turn will be.
 # it does this by changing the power to the wheels
@@ -129,11 +129,13 @@ if __name__ == '__main__':
     ap.add_argument("-r", "--rotate", required=False, default=0, help="Rotate the image by the provided degrees")
     ap.add_argument("--save-every-n", required=False, default=0, type=int, help="Save every n images while driving route. 0=none saved")
     ap.add_argument("--send-images", required=False, default=0, type=int, help="1-send image to server, 0[default]-do not send image to server")
+    ap.add_argument("--go-on-start", required=False, default=0, type=int, help="1-do not wait for button press, 0[default]-do not go on start, wait for button press")
 
     args = vars(ap.parse_args())
     send_images = args['send_images']
     server_ip = args['server_ip']
     rotation = float(args['rotate'])
+    go_on_start = args['go_on_start']
     every_n_route_images = args['save_every_n']
     if every_n_route_images > 0:
         Path('./route_images').mkdir(parents=True, exist_ok=True)
@@ -145,6 +147,10 @@ if __name__ == '__main__':
 
     model = load_model()
     loop_count = 0
+    if go_on_start:
+        go_state = CAR_GO
+        time.sleep(3) # just give the system time to settle out
+
     while True:
         check_car_state()
         if go_state == CAR_STOP:
